@@ -10,8 +10,8 @@ next(state) := case
         TRUE : state;
     esac;
 next(flag[i]) := case 
-        state = s0 & turn = i : TRUE; -- want to enter critical section 
-        state = s2 & turn = i : FALSE; -- end of critical section, b[i] := false
+        state = s0 : TRUE; -- want to enter critical section 
+        state = s2 : FALSE; -- end of critical section, b[i] := false
         TRUE : flag[i];
     esac;
 next(turn) := case
@@ -34,4 +34,6 @@ ASSIGN
 
 -- when turn = i or flag [1 - i] = false, critical section
 LTLSPEC G !((flag[0] = TRUE & (turn = 0 | flag[1] = FALSE)) & (flag[1] = TRUE & (turn = 1 | flag[0] = FALSE)))
-LTLSPEC G ((flag[0] = TRUE -> (flag[1] = FALSE | turn = 0)) & (flag[1] = TRUE -> (flag[0] = FALSE | turn = 1)))
+-- starvation-free : all processes that enter the loop eventually exit it
+LTLSPEC G((turn = 1 & flag[1] = TRUE) -> F(turn = 0 | flag[1] = FALSE))
+LTLSPEC G((turn = 0 & flag[0] = TRUE) -> F(turn = 1 | flag[0] = FALSE))
