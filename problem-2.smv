@@ -17,7 +17,7 @@ ASSIGN
             TRUE : TRUE;
         esac;
 FAIRNESS
-    running;
+    running
     
 MODULE main
 VAR

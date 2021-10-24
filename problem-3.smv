@@ -1,25 +1,25 @@
-MODULE mutex(i, flag, turn)
+MODULE mutex(i, flag, turn) --Peterson's Algorithm
 VAR
     state: {s0, s1, s2};
 ASSIGN
 init(state) := s0;
-next(state) := case
+next(state) := case --critical section
         state = s0 : s1;
         state = s1 : s2;
         state = s2 : s0;
         TRUE : state;
     esac;
-next(flag[i]) := case
-        state = s0 & turn = i : TRUE;
-        state = s2 & turn = i : FALSE;
+next(flag[i]) := case 
+        state = s0 & turn = i : TRUE; -- want to enter critical section 
+        state = s2 & turn = 1 : FALSE; -- end of critical section
         TRUE : flag[i];
     esac;
 next(turn) := case
-        state = s2 : 1 - i;
+        state = s2 : 1 - i; -- k = 1 - i
         TRUE : turn;
     esac;
 FAIRNESS 
-    running;
+    running
 
 MODULE main
 VAR
@@ -32,4 +32,4 @@ ASSIGN
     init(flag[0]) := FALSE;
     init(flag[1]) := FALSE;
 
-LTLSPEC G ! (flag[0] = TRUE & flag[1] = TRUE)
+LTLSPEC G !(flag[0] = TRUE & flag[1] = TRUE)
