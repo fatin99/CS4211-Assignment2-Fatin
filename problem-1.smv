@@ -1,25 +1,46 @@
 MODULE operator(id, inChan, outChan, busy, counter)
 ASSIGN
     next(busy[id]) := case
-        inChan = start & busy[id] = FALSE : TRUE;
-    
+            inChan = start & busy[id] = FALSE : TRUE;
+            inChan = stop & busy[id] = TRUE & outChan = stop : FALSE;
+            busy[id] = FALSE & busy[1-id] = FALSE : TRUE;
+            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 & outChan = stop & counter = 0 & inChan = stop : FALSE;
+            TRUE : busy[id]; 
+        esac;
+    next(outChan) := case
+            inChan = start & busy[id] = TRUE : ack;
+            inChan = data & busy[id] = TRUE : data;
+            inChan = stop & busy[id] = TRUE : stop;
+            busy[id] = TRUE & busy[1-id] = FALSE : start;
+            busy[id] = TRUE & busy[1-id] = FALSE & counter < 3 : data;
+            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 : stop;
+            TRUE : outChan;
+        esac;
+    next(counter) := case
+            busy[id] = TRUE & busy[1-id] = FALSE & counter < 3 & outChan = data : counter+1;
+            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 & outChan = stop : 0;
+            TRUE : counter;
+        esac;
 
 MODULE main
 VAR
-    busy: array 0..2 of boolean;
-    counter: integer;
-    state: {start , stop , data , ack};
-    up: array 0..2 of state;
-    down: array 0..2 of state;
-    operator_1: process operator(0, up[1], down[1], busy, counter);
-    operator_2: process operator(1, up[0], down[0], busy, counter);
-    operator_3: process operator(0, down[0], up[0], busy, counter);
-    operator_4: process operator(1, down[1], up[1], busy, counter);
+    busy: array 0..1 of boolean;
+    counter: 0 .. 4;
+    up0: {start , stop , data , ack};
+    down0: {start , stop , data , ack};
+    up1: {start , stop , data , ack};
+    down1: {start , stop , data , ack};
+    operator_1: process operator(0, up1, down1, busy, counter);
+    operator_2: process operator(1, up0, down0, busy, counter);
+    operator_3: process operator(0, down0, up0, busy, counter);
+    operator_4: process operator(1, down1, up1, busy, counter);
 ASSIGN
     init(counter) := 0;
-    init(busy) := FALSE;
+    init(busy[0]) := FALSE;
+    init(busy[1]) := FALSE;
+    init(up0) := start;
+    init(up1) := start;
+    init(down0) := start;
+    init(down1) := start;
 
-LTLSPEC G !((proc_1.key = TRUE) & (proc_2.key = TRUE))
-LTLSPEC G (F (proc_1.key = TRUE))
-LTLSPEC G (F (proc_2.key = TRUE))
-
+LTLSPEC G ((up0 = start -> F (up0 = stop)) & (up1 = start -> F (up1 = stop)) & (down0 = start -> F (down0 = stop)) & (down1 = start -> F (down1 = stop)))

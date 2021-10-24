@@ -1,25 +1,30 @@
 MODULE mutex0(b, k)
 ASSIGN
-    b[0] := TRUE;
-    k := 1 - 0;
+    init(b[0]) := FALSE;
+    next(k) := case
+            TRUE : 1;
+        esac;  
+    next(b[0]) := case
+            k = 1 & b[1] = TRUE : FALSE; --busy wait
+            k = 0 | b[1] = FALSE : TRUE;
+        esac;
 
 MODULE mutex1(b, k)
 ASSIGN
+    init(b[1]) := FALSE;
+    next(k) := case
+            TRUE : 0;
+        esac; 
     next(b[1]) := case
-        k != 1 & b[0] = TRUE : //goto mutex1;
-        k = 1 | b[0] = FALSE : //critical section;
-    esac;
-    b[1] := FALSE;
-    //non-critical section
-    //goto mutex0
+            k = 0 & b[0] = TRUE : FALSE; -- busy wait
+            k = 1 | b[0] = FALSE : TRUE;
+        esac;       
 
 MODULE main
 VAR
-    b: array 0..2 of boolean;
-    k: integer
+    b: array 0..1 of boolean;
+    k: 0..1;
     proc_0: process mutex0(b, k);
     proc_1: process mutex1(b, k);
-ASSIGN
-    init(b) := FALSE;
 
-LTLSPEC G !((proc_0.key = TRUE) & (proc_1.key = TRUE))
+LTLSPEC G !((b[1] = FALSE) & (k = 0))

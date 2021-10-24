@@ -4,15 +4,18 @@ VAR
 ASSIGN
     init(key) := FALSE;
     next(key) := case
-        key = FALSE & lock = FALSE : FALSE;
-        key = FALSE & lock = TRUE : TRUE;   
-        key = TRUE : FALSE;
-    esac;
+            TRUE : FALSE;
+            --swap while key is false
+            key = FALSE & lock = FALSE : FALSE; 
+            key = FALSE & lock = TRUE : TRUE;   
+        esac;
     next(lock) := case
-        key = FALSE & lock = FALSE : FALSE;
-        key = FALSE & lock = TRUE : FALSE;
-        key = TRUE : TRUE;
-    esac;
+            --swap while key is false
+            key = FALSE & lock = FALSE : FALSE;
+            key = FALSE & lock = TRUE : FALSE;
+            --key is not false anymore
+            TRUE : TRUE;
+        esac;
     
 
 MODULE main
