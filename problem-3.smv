@@ -1,30 +1,30 @@
-MODULE mutex0(b, k)
+MODULE mutex(i, flag, turn)
 ASSIGN
-    init(b[0]) := FALSE;
-    next(k) := case
-            TRUE : 1;
-        esac;  
-    next(b[0]) := case
-            k = 1 & b[1] = TRUE : FALSE; --busy wait
-            k = 0 | b[1] = FALSE : TRUE;
-        esac;
-
-MODULE mutex1(b, k)
-ASSIGN
-    init(b[1]) := FALSE;
-    next(k) := case
-            TRUE : 0;
-        esac; 
-    next(b[1]) := case
-            k = 0 & b[0] = TRUE : FALSE; -- busy wait
-            k = 1 | b[0] = FALSE : TRUE;
-        esac;       
+--do {
+--   flag[i] = true;
+--   turn = j;
+--   while (flag[j] && turn == j);
+--   /* critical section */
+--   flag[i] = false;
+--   /* remainder section */
+--}
+--while (true);
+next(flag[i]) := case
+        TRUE : TRUE;   
+        flag[1-i] = FALSE | turn = i : FALSE;
+    esac;
+next(turn) := case
+        TRUE : 1 - i;   
+    esac;
 
 MODULE main
 VAR
-    b: array 0..1 of boolean;
-    k: 0..1;
-    proc_0: process mutex0(b, k);
-    proc_1: process mutex1(b, k);
+    flag: array 0..1 of boolean;
+    turn: 0..1;
+    proc_0: process mutex(0, flag, turn);
+    proc_1: process mutex(1, flag, turn);
+ASSIGN
+    init(flag[0]) := FALSE;
+    init(flag[1]) := FALSE;
 
-LTLSPEC G !((b[1] = FALSE) & (k = 0))
+LTLSPEC G !((flag[1] = FALSE) & (turn = 0) | (flag[0] = FALSE) & (turn = 1))
