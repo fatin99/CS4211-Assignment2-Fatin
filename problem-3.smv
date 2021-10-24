@@ -32,4 +32,5 @@ ASSIGN
     init(flag[0]) := FALSE;
     init(flag[1]) := FALSE;
 
-LTLSPEC G !((flag[0] = TRUE & (flag[1] = TRUE | turn = 1)) & (flag[1] = TRUE & (flag[0] = TRUE | turn = 0)))
+LTLSPEC G (flag[0] = TRUE -> (flag[1] = FALSE | turn = 0))
+LTLSPEC G (flag[1] = TRUE -> (flag[0] = FALSE | turn = 1))
