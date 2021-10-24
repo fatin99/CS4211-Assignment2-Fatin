@@ -1,0 +1,29 @@
+MODULE mutex(lock)
+VAR
+    key: boolean;
+ASSIGN
+    init(key) := FALSE;
+    next(key) := case
+        key = FALSE & lock = FALSE : FALSE;
+        key = FALSE & lock = TRUE : TRUE;   
+        key = TRUE : FALSE;
+    esac;
+    next(lock) := case
+        key = FALSE & lock = FALSE : FALSE;
+        key = FALSE & lock = TRUE : FALSE;
+        key = TRUE : TRUE;
+    esac;
+    
+
+MODULE main
+VAR
+    lock: boolean;
+    proc_1: process mutex(lock);
+    proc_2: process mutex(lock);
+ASSIGN
+    init(lock) := TRUE;
+
+LTLSPEC G !((proc_1.key = TRUE) & (proc_2.key = TRUE))
+LTLSPEC G (F (proc_1.key = TRUE))
+LTLSPEC G (F (proc_2.key = TRUE))
+

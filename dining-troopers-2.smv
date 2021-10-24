@@ -1,0 +1,31 @@
+MODULE trooper(forks)
+VAR
+    state: {not-eating, eating, waiting};
+ASSIGN
+    init(state) := not-eating;
+    next(state) := case
+        state = not-eating & forks > 0 : waiting;
+        state = waiting & forks > 0 : eating;
+        state = waiting & forks = 0 : not-eating;
+        state = eating : not-eating;
+        TRUE: state;
+    esac;
+    next(forks) := case
+        state = not-eating & forks > 0 : forks -1;
+        state = waiting & forks > 0 : forks -1;
+        state = waiting & forks = 0 : forks + 1;
+        state = eating : 2;
+        TRUE: forks;
+    esac;
+
+MODULE main
+VAR
+    forks: 0..2;
+    troop_1: process trooper(forks);
+    troop_2: process trooper(forks);
+ASSIGN
+    init(forks) := 2;
+
+LTLSPEC G !((troop_1.state = eating) & (troop_2.state = eating))
+LTLSPEC G(F (troop1.state = eating) | F (troop2.state = eating))
+//LIVELOCK

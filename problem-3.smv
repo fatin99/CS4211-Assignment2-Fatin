@@ -1,0 +1,25 @@
+MODULE mutex0(b, k)
+ASSIGN
+    b[0] := TRUE;
+    k := 1 - 0;
+
+MODULE mutex1(b, k)
+ASSIGN
+    next(b[1]) := case
+        k != 1 & b[0] = TRUE : //goto mutex1;
+        k = 1 | b[0] = FALSE : //critical section;
+    esac;
+    b[1] := FALSE;
+    //non-critical section
+    //goto mutex0
+
+MODULE main
+VAR
+    b: array 0..2 of boolean;
+    k: integer
+    proc_0: process mutex0(b, k);
+    proc_1: process mutex1(b, k);
+ASSIGN
+    init(b) := FALSE;
+
+LTLSPEC G !((proc_0.key = TRUE) & (proc_1.key = TRUE))

@@ -1,0 +1,25 @@
+MODULE operator(id, inChan, outChan, busy, counter)
+ASSIGN
+    next(busy[id]) := case
+        inChan = start & busy[id] = FALSE : TRUE;
+    
+
+MODULE main
+VAR
+    busy: array 0..2 of boolean;
+    counter: integer;
+    state: {start , stop , data , ack};
+    up: array 0..2 of state;
+    down: array 0..2 of state;
+    operator_1: process operator(0, up[1], down[1], busy, counter);
+    operator_2: process operator(1, up[0], down[0], busy, counter);
+    operator_3: process operator(0, down[0], up[0], busy, counter);
+    operator_4: process operator(1, down[1], up[1], busy, counter);
+ASSIGN
+    init(counter) := 0;
+    init(busy) := FALSE;
+
+LTLSPEC G !((proc_1.key = TRUE) & (proc_2.key = TRUE))
+LTLSPEC G (F (proc_1.key = TRUE))
+LTLSPEC G (F (proc_2.key = TRUE))
+

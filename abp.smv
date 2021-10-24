@@ -1,0 +1,21 @@
+MODULE main
+VAR
+    toS: boolean;
+    toR: boolean;
+    rcvr: process receiver(toR, toS);
+    sndr: process sender(toS, toR);
+ASSIGN
+    init(toS):= FALSE;
+    init(toR):= FALSE;
+
+MODULE receiver(input,output)
+ASSIGN
+    next(output) := input;
+FAIRNESS
+    running
+
+MODULE receiver(input,output)
+ASSIGN
+    next(output) := !input;
+FAIRNESS
+    running

@@ -1,0 +1,9 @@
+MODULE main
+VAR
+    light: {red, green, yellow};
+ASSIGN
+    next(light) := case
+        light = red : green;
+        light = green : yellow;
+        light = yellow : red;
+    esac;
