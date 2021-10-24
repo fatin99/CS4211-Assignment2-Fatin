@@ -31,4 +31,3 @@ ASSIGN
 LTLSPEC G !((proc_1.key = TRUE) & (proc_2.key = TRUE)) 
 LTLSPEC G (F (proc_1.key = TRUE))
 LTLSPEC G (F (proc_2.key = TRUE))
-
