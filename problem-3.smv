@@ -3,15 +3,15 @@ VAR
     state: {s0, s1, s2};
 ASSIGN
 init(state) := s0;
-next(state) := case --critical section
-        state = s0 : s1;
-        state = s1 : s2;
-        state = s2 : s0;
+next(state) := case
+        (flag[i] = TRUE & (flag[1-i] = FALSE | turn = i)) & state = s0 : s1; -- critical section
+        (flag[i] = TRUE & (flag[1-i] = FALSE | turn = i)) & state = s1 : s2;
+        (flag[i] = TRUE & (flag[1-i] = FALSE | turn = i)) & state = s2 : s0;
         TRUE : state;
     esac;
 next(flag[i]) := case 
         state = s0 & turn = i : TRUE; -- want to enter critical section 
-        state = s2 & turn = 1 : FALSE; -- end of critical section
+        state = s2 & turn = i : FALSE; -- end of critical section, b[i] := false
         TRUE : flag[i];
     esac;
 next(turn) := case
