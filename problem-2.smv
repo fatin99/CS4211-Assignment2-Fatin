@@ -16,8 +16,9 @@ ASSIGN
             --key is not false anymore
             TRUE : TRUE;
         esac;
+FAIRNESS
+    running;
     
-
 MODULE main
 VAR
     lock: boolean;

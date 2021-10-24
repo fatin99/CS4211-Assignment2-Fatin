@@ -1,21 +1,25 @@
 MODULE mutex(i, flag, turn)
+VAR
+    state: {s0, s1, s2};
 ASSIGN
---do {
---   flag[i] = true;
---   turn = j;
---   while (flag[j] && turn == j);
---   /* critical section */
---   flag[i] = false;
---   /* remainder section */
---}
---while (true);
+init(state) := s0;
+next(state) := case
+        state = s0 : s1;
+        state = s1 : s2;
+        state = s2 : s0;
+        TRUE : state;
+    esac;
 next(flag[i]) := case
-        TRUE : TRUE;   
-        flag[1-i] = FALSE | turn = i : FALSE;
+        state = s0 & turn = i : TRUE;
+        state = s2 & turn = i : FALSE;
+        TRUE : flag[i];
     esac;
 next(turn) := case
-        TRUE : 1 - i;   
+        state = s2 : 1 - i;
+        TRUE : turn;
     esac;
+FAIRNESS 
+    running;
 
 MODULE main
 VAR
@@ -24,7 +28,8 @@ VAR
     proc_0: process mutex(0, flag, turn);
     proc_1: process mutex(1, flag, turn);
 ASSIGN
+    init(turn) := 0;
     init(flag[0]) := FALSE;
     init(flag[1]) := FALSE;
 
-LTLSPEC G !((flag[1] = FALSE) & (turn = 0) | (flag[0] = FALSE) & (turn = 1))
+LTLSPEC G ! (flag[0] = TRUE & flag[1] = TRUE)
