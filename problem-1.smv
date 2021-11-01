@@ -1,31 +1,31 @@
 MODULE operator(id, inChan, outChan, busy, counter)
 ASSIGN
     next(busy[id]) := case
-            inChan = start & busy[id] = FALSE : TRUE;
-            inChan = stop & busy[id] = TRUE & outChan = stop : FALSE;
-            busy[id] = FALSE & busy[1-id] = FALSE : TRUE;
-            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 & outChan = stop & counter = 0 & inChan = stop : FALSE;
+            inChan = start | busy[1-id] = FALSE : TRUE;
+            inChan = stop | outChan = stop : FALSE;
             TRUE : busy[id]; 
         esac;
     next(outChan) := case
             inChan = start & busy[id] = TRUE : ack;
             inChan = data & busy[id] = TRUE : data;
             inChan = stop & busy[id] = TRUE : stop;
-            busy[id] = TRUE & busy[1-id] = FALSE : start;
-            busy[id] = TRUE & busy[1-id] = FALSE & counter < 3 : data;
-            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 : stop;
+            busy[1-id] = FALSE & busy[id] = TRUE : start;
+            (inChan = ack | inChan = data) & busy[id] = TRUE & counter < 3 : data;
+            inChan = data & busy[id] = TRUE & counter = 3 : stop;
             TRUE : outChan;
         esac;
     next(counter) := case
-            busy[id] = TRUE & busy[1-id] = FALSE & counter < 3 & outChan = data : counter+1;
-            busy[id] = TRUE & busy[1-id] = FALSE & counter <= 3 & outChan = stop : 0;
+            outChan = data & busy[id] = TRUE & counter < 3 : counter+1;
+            outChan = stop & busy[id] = TRUE & counter = 3 : 0;
             TRUE : counter;
         esac;
+FAIRNESS 
+    running
 
 MODULE main
 VAR
     busy: array 0..1 of boolean;
-    counter: 0 .. 4;
+    counter: 0 .. 3;
     up0: {start , stop , data , ack};
     down0: {start , stop , data , ack};
     up1: {start , stop , data , ack};
