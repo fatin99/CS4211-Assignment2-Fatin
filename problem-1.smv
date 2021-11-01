@@ -11,7 +11,7 @@ ASSIGN
             inChan = stop & busy[id] = TRUE : stop;
             busy[1-id] = FALSE & busy[id] = TRUE : start;
             (inChan = ack | inChan = data) & busy[id] = TRUE & counter < 3 : data;
-            inChan = data & busy[id] = TRUE & counter = 3 : stop;
+            (inChan = ack | inChan = data) & busy[id] = TRUE & counter = 3 : stop;
             TRUE : outChan;
         esac;
     next(counter) := case
