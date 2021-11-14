@@ -28,6 +28,8 @@ ASSIGN
     init(lock) := TRUE;
 
 -- when key = true, critical section
-LTLSPEC G !((proc_1.key = TRUE) & (proc_2.key = TRUE)) 
-LTLSPEC G (F (proc_1.key = TRUE))
-LTLSPEC G (F (proc_2.key = TRUE))
+LTLSPEC G!((proc_1.key = TRUE) & (proc_2.key = TRUE)) 
+-- deadlock/livelock
+LTLSPEC G(F(proc_1.key = TRUE) & F(proc_2.key = TRUE))
+-- starvation
+LTLSPEC G(F(proc_1.key = TRUE) | F(proc_2.key = TRUE))

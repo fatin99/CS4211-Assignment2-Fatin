@@ -35,5 +35,7 @@ ASSIGN
 -- when turn = i or flag [1 - i] = false, critical section
 LTLSPEC G !((flag[0] = TRUE & (turn = 0 | flag[1] = FALSE)) & (flag[1] = TRUE & (turn = 1 | flag[0] = FALSE)))
 -- starvation-free : all processes that enter the loop eventually exit it
-LTLSPEC G((turn = 1 & flag[1] = TRUE) -> F(turn = 0 | flag[1] = FALSE))
-LTLSPEC G((turn = 0 & flag[0] = TRUE) -> F(turn = 1 | flag[0] = FALSE))
+-- (they don't stay in the critical section indefinitely)
+LTLSPEC G(((turn = 1 | flag[0] = FALSE) & flag[1] = TRUE) -> F(turn = 0 | flag[1] = FALSE))
+LTLSPEC G(((turn = 0 | flag[1] = FALSE) & flag[0] = TRUE) -> F(turn = 1 | flag[0] = FALSE))
+LTLSPEC G(((turn = 1 | flag[0] = FALSE) & flag[1] = TRUE) -> F(turn = 0 | flag[1] = FALSE) & (((turn = 0 | flag[1] = FALSE) & flag[0] = TRUE) -> F(turn = 1 | flag[0] = FALSE)))
